@@ -1,0 +1,395 @@
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local VIM = game:GetService("VirtualInputManager")
+local player = Players.LocalPlayer
+
+local running = false
+local RADIUS = 6
+local lastPress = 0
+local DEBOUNCE_TIME = 0.15
+
+local successAnims = {
+	["124079813029288"] = true,
+	["92749946680571"]  = true,
+	["86742150587236"]  = true,
+}
+
+local ignoreAnims = {
+	["80085051659887"]  = true,
+	["93591921197987"]  = true,
+	["96204529754661"]  = true,
+	["97334784195050"]  = true,
+	["99588012831073"]  = true,
+}
+
+local animTimings = {
+	["96244718539868"]  = 0.23,
+	["106790801785093"] = 0.23,
+	["83699390795630"]  = 0.23,
+	["110464142491021"] = 0.23,
+	["82703735519191"]  = 0.28,
+	["99161034180416"]  = 0.23,
+	["72893586484881"]  = 0.23,
+	["104301585162154"] = 0.23,
+	["80803146731068"]  = 0.23,
+	["111176160004421"] = 0.23,
+	["79317840013059"]  = 0.23,
+	["99403600899489"]  = 0.23,
+	["140694626634672"] = 0.23,
+	["71981135077304"]  = 0.23,
+	["97207934945895"]  = 0.23,
+	["99123117296687"]  = 0.24,
+	["122366245358908"] = 0.24,
+	["80284105973496"]  = 0.23,
+	["90805685400033"]  = 0.23,
+	["97183380016019"]  = 0.23,
+	["114332338560146"] = 0.23,
+	["109098980110879"] = 0.23,
+	["80284243770547"]  = 0.23,
+	["131290848618791"] = 0.19,
+	["107414909713735"] = 0.19,
+	["117941926523928"] = 0.19,
+	["86999308638835"]  = 0.19,
+	["125065785475546"] = 0.19,
+	["72485489457454"]  = 0.23,
+	["113047779762772"] = 0.23,
+	["70966386908517"]  = 0.23,
+	["116377295300176"] = 0.23,
+	["88230215152325"]  = 0.23,
+	["122633448818379"] = 0.25,
+	["103678364286823"] = 0.23,
+	["75801755794341"]  = 0.23,
+	["131607719265379"] = 0.23,
+	["118886606431756"] = 0.23,
+	["82449320155297"]  = 0.23,
+	["98781159747451"]  = 0.25,
+	["92621054099832"]  = 0.17,
+	["85653982002110"]  = 0.17,
+	["120903437464102"] = 0.17,
+	["129988984950882"] = 0.17,
+	["96081655124594"]  = 0.17,
+	["92983755924332"]  = 0.23,
+	["135824707154203"] = 0.23,
+	["107695628181385"] = 0.23,
+	["84020744938010"]  = 0.23,
+	["117076105315138"] = 0.23,
+	["128811259824820"] = 0.23,
+	["87619296908926"]  = 0.23,
+	["123556046418031"] = 0.23,
+	["73803912704462"]  = 0.23,
+	["96109891913442"]  = 0.23,
+	["102062155777322"] = 0.23,
+	["89038414235428"]  = 0.23,
+	["92171355415149"]  = 0.23,
+	["130346894658364"] = 0.23,
+	["91705821421590"]  = 0.23,
+	["83285069877095"]  = 0.23,
+	["118825404606155"] = 0.23,
+	["104564869318080"] = 0.23,
+	["116872145425534"] = 0.23,
+	["102181548277030"] = 0.23,
+	["132202883347912"] = 0.23,
+	["82429684573762"]  = 0.23,
+	["133848539490828"] = 0.23,
+	["107890738657118"] = 0.23,
+	["87472462557957"]  = 0.23,
+	["116742764048664"] = 0.23,
+	["113927674267756"] = 0.23,
+	["95073586563961"]  = 0.23,
+	["127872790717725"] = 0.23,
+	["101164741557366"] = 0.05,
+	["83271053606286"]  = 0.23,
+	["136113727837672"] = 0.23,
+	["76365368267714"]  = 0.23,
+	["136825808827026"] = 0.23,
+	["86876004159859"]  = 0.23,
+	["137949270207652"] = 0.23,
+	["93225594540496"]  = 0.23,
+	["126702468558128"] = 0.23,
+	["105646561292554"] = 0.23,
+	["74371531783601"]  = 0.23,
+	["120354200897949"] = 0.23,
+	["77749038808259"]  = 0.23,
+	["98020330457962"]  = 0.23,
+	["124102275750507"] = 0.05,
+	["107668879288149"] = 0.05,
+	["71694260835850"]  = 0.05,
+	["127114274989556"] = 0.23,
+	["123425317369836"] = 0.23,
+	["105889052602364"] = 0.23,
+	["87504747141812"]  = 0.23,
+	["139854995300684"] = 0.23,
+	["113456919392753"] = 0.23,
+	["74594139745342"]  = 0.23,
+	["129705200778933"] = 0.23,
+	["91135189994738"]  = 0.23,
+	["134038006328411"] = 0.23,
+	["110809334644360"] = 0.23,
+	["80059561827664"]  = 0.23,
+	["109155424139191"] = 0.23,
+	["82933574764414"]  = 0.23,
+	["82020028229915"]  = 0.23,
+	["136977580287143"] = 0.23,
+	["119016997410184"] = 0.23,
+	["96593004369150"]  = 0.23,
+	["72870782209150"]  = 0.23,
+	["71431633929050"]  = 0.23,
+	["75969244925552"]  = 0.23,
+	["72547956900988"]  = 0.23,
+	["117689581910189"] = 0.23,
+	["80615918018430"]  = 0.23,
+	["129811459435412"] = 0.23,
+	["118318986442606"] = 0.23,
+	["104719808098735"] = 0.23,
+	["89859596936396"]  = 0.23,
+	["87430205932655"]  = 0.23,
+	["131459721959669"] = 0.23,
+	["72054987657488"]  = 0.23,
+	["119867496199580"] = 0.23,
+	["100879917457133"] = 0.23,
+	["137419143120814"] = 0.23,
+	["85003925486546"]  = 0.23,
+	["78177752841370"]  = 0.23,
+	["128258497523647"] = 0.23,
+	["140160665637036"] = 0.23,
+	["87732348239340"]  = 0.23,
+	["138960467116200"] = 0.23,
+	["114786034964296"] = 0.23,
+	["79847703099402"]  = 0.23,
+	["98158226189709"]  = 0.23,
+	["91339382592042"]  = 0.23,
+	["78643691131516"]  = 0.23,
+	["90062465828866"]  = 0.23,
+	["129007485132935"] = 0.23,
+	["79787151029755"]  = 0.23,
+	["85175667879920"]  = 0.23,
+	["125330342619098"] = 0.23,
+	["134371919300299"] = 0.23,
+	["79821489852510"]  = 0.23,
+	["140551434911461"] = 0.23,
+	["72719248520827"]  = 0.23,
+	["78117565985142"]  = 0.23,
+	["107778585658062"] = 0.23,
+	["129590392575515"] = 0.23,
+	["76466584185128"]  = 0.23,
+	["77906806260394"]  = 0.23,
+	["105600867916972"] = 0.23,
+	["106928653633810"] = 0.23,
+	["91309822575503"]  = 0.23,
+	["125428854369961"] = 0.23,
+	["94105224791599"]  = 0.23,
+	["76293018647342"]  = 0.23,
+	["94207851902966"]  = 0.23,
+	["105026487260701"] = 0.23,
+	["89574978188518"]  = 0.23,
+	["78848559023200"]  = 0.23,
+	["86970614235520"]  = 0.23,
+	["120161169602649"] = 0.23,
+	["131531612562494"] = 0.23,
+	["123140026741988"] = 0.23,
+	["131636817560483"] = 0.23,
+	["86543961548099"]  = 0.23,
+	["119251157686274"] = 0.23,
+	["115263669921103"] = 0.23,
+	["125802799067251"] = 0.23,
+	["123338162742977"] = 0.23,
+	["75854064975374"]  = 0.23,
+	["82437287972894"]  = 0.23,
+	["133769831742173"] = 0.23,
+	["118733574388933"] = 0.23,
+	["72615843211361"]  = 0.23,
+	["101984141756816"] = 0.23,
+	["100556790326205"] = 0.23,
+	["74283363413448"]  = 0.23,
+	["81562676664468"]  = 0.23,
+	["111322479705437"] = 0.23,
+	["132326144893786"] = 0.23,
+	["86606811740094"]  = 0.23,
+	["105560092659573"] = 0.23,
+	["120244492721400"] = 0.23,
+	["97176242694695"]  = 0.23,
+    ["106289465250350"] = 0.23,
+    ["77379832098451"] = 0.23,
+    ["95238967881368"] = 0.23,
+    ["103063390632768"] = 0.23,
+    ["70670337660722"]  = 0.23,
+    ["107454709350500"] = 0.18,
+    ["139666685214927"] = 0.18,
+    ["100292973318569"] = 0.18,
+    ["110729804553900"] = 0.18,
+    ["72316729258464"]  = 0.18,
+    ["109350070287282"] = 0.18,
+    ["97542742783539"]  = 0.23,
+    ["89301568517448"]  = 0.23,
+    ["97368499843187"]  = 0.23,
+    ["76189566703763"]  = 0.23,
+    ["139280240616103"] = 0.23,
+    ["95161679383333"]  = 0.18,
+    ["107414909713735"] = 0.23,
+    ["129007485132935"] = 0.23,
+    ["79787151029755"]  = 0.23,
+    ["85175667879920"]  = 0.23,
+    ["109098980110879"] = 0.23,
+    ["131226568550805"] = 0.18,
+}
+local lastTriggeredAnim = nil
+local lastTriggeredTime = nil
+local lastPressTime = nil
+local weaveSucceeded = false
+local connections = {}
+local walkspeedConnections = {}
+
+local function notify(text, color)
+	local screenGui = Instance.new("ScreenGui")
+	screenGui.ResetOnSpawn = false
+	screenGui.Parent = player.PlayerGui
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(0, 200, 0, 50)
+	frame.Position = UDim2.new(1, -210, 0.5, 0)
+	frame.BackgroundColor3 = color or Color3.fromRGB(30, 30, 30)
+	frame.BorderSizePixel = 0
+	frame.Parent = screenGui
+	Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+	local label = Instance.new("TextLabel", frame)
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	label.TextScaled = true
+	label.Font = Enum.Font.GothamBold
+	task.delay(2, function() screenGui:Destroy() end)
+end
+
+local function getDistance(otherChar)
+	local myChar = player.Character
+	if not myChar then return math.huge end
+	local r1 = myChar:FindFirstChild("HumanoidRootPart")
+	local r2 = otherChar:FindFirstChild("HumanoidRootPart")
+	if not r1 or not r2 then return math.huge end
+	return (r1.Position - r2.Position).Magnitude
+end
+
+local function pressR()
+	local now = tick()
+	if now - lastPress < DEBOUNCE_TIME then return end
+	lastPress = now
+	weaveSucceeded = false
+	lastPressTime = now
+	VIM:SendKeyEvent(true, Enum.KeyCode.R, false, game)
+	task.wait(0.05)
+	VIM:SendKeyEvent(false, Enum.KeyCode.R, false, game)
+	task.delay(0.5, function()
+		if not weaveSucceeded and lastTriggeredAnim and animTimings[lastTriggeredAnim] then
+			animTimings[lastTriggeredAnim] = math.max(0.05, animTimings[lastTriggeredAnim] - 0.01)
+			print("Missed weave, nudged " .. lastTriggeredAnim .. " to " .. animTimings[lastTriggeredAnim])
+		end
+	end)
+end
+
+local function watchMyAnimator()
+	local char = player.Character or player.CharacterAdded:Wait()
+	local humanoid = char:WaitForChild("Humanoid")
+	local animator = humanoid:WaitForChild("Animator")
+
+	animator.AnimationPlayed:Connect(function(track)
+		local id = track.Animation.AnimationId:match("%d+")
+		if successAnims[id] then
+			weaveSucceeded = true
+			lastTriggeredAnim = nil
+			lastTriggeredTime = nil
+		end
+	end)
+end
+
+local function watchWalkspeed(p)
+	local char = p.Character
+	if not char then return end
+	local humanoid = char:FindFirstChildOfClass("Humanoid")
+	if not humanoid then return end
+
+	local c = humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+		if not running then return end
+		local ws = humanoid.WalkSpeed
+		if ws > 0 and ws < 10 and getDistance(char) <= RADIUS then
+			pressR()
+		end
+	end)
+	table.insert(walkspeedConnections, c)
+end
+
+local function watchPlayer(p)
+	if p == player then return end
+	local function connectAnimator(char)
+		local humanoid = char:FindFirstChildOfClass("Humanoid")
+		local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
+		if not animator then return end
+
+		local c = animator.AnimationPlayed:Connect(function(track)
+			if not running then return end
+			if getDistance(char) > RADIUS then return end
+			local id = track.Animation.AnimationId:match("%d+")
+			if ignoreAnims[id] then return end
+			local delay = animTimings[id]
+			if delay then
+				lastTriggeredAnim = id
+				lastTriggeredTime = tick()
+				task.delay(delay, function()
+					if running and getDistance(char) <= RADIUS then pressR() end
+				end)
+			end
+		end)
+		table.insert(connections, c)
+
+		for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
+			local id = track.Animation.AnimationId:match("%d+")
+			if ignoreAnims[id] then continue end
+			local delay = animTimings[id]
+			if delay and getDistance(char) <= RADIUS then
+				lastTriggeredAnim = id
+				lastTriggeredTime = tick()
+				task.delay(delay, function()
+					if running and getDistance(char) <= RADIUS then pressR() end
+				end)
+			end
+		end
+
+		watchWalkspeed(p)
+	end
+
+	if p.Character then connectAnimator(p.Character) end
+	local c = p.CharacterAdded:Connect(function(char)
+		if running then connectAnimator(char) end
+	end)
+	table.insert(connections, c)
+end
+
+local function watch()
+	for _, p in ipairs(Players:GetPlayers()) do
+		watchPlayer(p)
+	end
+	watchMyAnimator()
+end
+
+local function stop()
+	for _, c in ipairs(connections) do c:Disconnect() end
+	for _, c in ipairs(walkspeedConnections) do c:Disconnect() end
+	connections = {}
+	walkspeedConnections = {}
+end
+
+UIS.InputBegan:Connect(function(input, gp)
+	if input.KeyCode == Enum.KeyCode.P and not gp then
+		running = not running
+		if running then
+			watch()
+			notify("Auto Weave: ON", Color3.fromRGB(0, 180, 0))
+		else
+			stop()
+			notify("Auto Weave: OFF", Color3.fromRGB(180, 0, 0))
+		end
+	end
+end)
+
+Players.PlayerAdded:Connect(function(p)
+	if running then watchPlayer(p) end
+end)
