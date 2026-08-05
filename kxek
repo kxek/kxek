@@ -245,7 +245,7 @@ local animTimings = {
     ["101728317807480"] = 0.05,
     ["93855934180192"]  = 0.05,
     ["101728317807480"] = 0.05,
-    ["116040007879284"] = 0.05,
+    ["116040007879284"] = 0.02,
     ["91136255355997"]  = 0.20,
     ["80094562128863"]  = 0.19,
     ["79687390978514"]  = 0.19,
@@ -423,6 +423,7 @@ UIS.InputBegan:Connect(function(input, gp)
 		end
 	end
 end)
+
 
 Players.PlayerAdded:Connect(function(p)
 	if running then watchPlayer(p) end
