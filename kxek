@@ -7,7 +7,6 @@ local running = false
 local RADIUS = 6
 local lastPress = 0
 local DEBOUNCE_TIME = 0.15
-local SAVE_FILE = "autoweave_timings"
 
 local successAnims = {
 	["124079813029288"] = true,
@@ -23,11 +22,11 @@ local ignoreAnims = {
 	["99588012831073"]  = true,
 }
 
-local defaultTimings = {
+local animTimings = {
 	["96244718539868"]  = 0.19,
 	["106790801785093"] = 0.19,
 	["83699390795630"]  = 0.19,
-	["110464142491021"] = 0.19,
+    ["110464142491021"] = 0.19,
 	["82703735519191"]  = 0.19,
 	["99161034180416"]  = 0.19,
 	["72893586484881"]  = 0.19,
@@ -46,7 +45,7 @@ local defaultTimings = {
 	["97183380016019"]  = 0.19,
 	["114332338560146"] = 0.19,
 	["109098980110879"] = 0.19,
-	["80284243770547"]  = 0.19,
+	["80284243770547"]  = 0.05,
 	["131290848618791"] = 0.19,
 	["107414909713735"] = 0.19,
 	["117941926523928"] = 0.19,
@@ -98,21 +97,21 @@ local defaultTimings = {
 	["113927674267756"] = 0.19,
 	["95073586563961"]  = 0.19,
 	["127872790717725"] = 0.19,
-	["101164741557366"] = 0.05,
-	["83271053606286"]  = 0.19,
-	["136113727837672"] = 0.19,
-	["76365368267714"]  = 0.19,
+	["101164741557366"] = 0.19,
+	["83271053606286"]  = 0.05,
+	["136113727837672"] = 0.05,
+	["76365368267714"]  = 0.40,
 	["136825808827026"] = 0.19,
 	["86876004159859"]  = 0.19,
 	["137949270207652"] = 0.19,
 	["93225594540496"]  = 0.19,
 	["126702468558128"] = 0.19,
 	["105646561292554"] = 0.19,
-	["74371531783601"]  = 0.19,
+	["74371531783601"]  = 0.05,
 	["120354200897949"] = 0.19,
 	["77749038808259"]  = 0.19,
 	["98020330457962"]  = 0.19,
-	["124102275750507"] = 0.05,
+	["124102275750507"] = 0.19,
 	["107668879288149"] = 0.05,
 	["71694260835850"]  = 0.05,
 	["127114274989556"] = 0.19,
@@ -128,15 +127,15 @@ local defaultTimings = {
 	["110809334644360"] = 0.19,
 	["80059561827664"]  = 0.19,
 	["109155424139191"] = 0.19,
-	["82933574764414"]  = 0.19,
-	["82020028229915"]  = 0.19,
+	["82933574764414"]  = 0.05,
+	["82020028229915"]  = 0.05,
 	["136977580287143"] = 0.19,
 	["119016997410184"] = 0.19,
 	["96593004369150"]  = 0.19,
 	["72870782209150"]  = 0.19,
 	["71431633929050"]  = 0.19,
 	["75969244925552"]  = 0.19,
-	["72547956900988"]  = 0.23,
+	["72547956900988"]  = 0.19,
 	["117689581910189"] = 0.19,
 	["80615918018430"]  = 0.19,
 	["129811459435412"] = 0.19,
@@ -229,40 +228,35 @@ local defaultTimings = {
 	["131226568550805"] = 0.18,
     ["120048293814223"] = 0.19,
     ["118922539869790"] = 0.19,
+    ["103592360232339"] = 0.19,
+    ["125918754543066"] = 0.19,
+    ["99271567708374"]  = 0.19,
+    ["125308059573730"] = 0.19,
+    ["107239503736659"] = 0.19,
+    ["121723373787738"] = 0.19,
+    ["77436213012711"]  = 0.05,
+    ["126590526659550"] = 0.19,
+    ["85540891918328"]  = 0.19,
+    ["90413701112613"]  = 0.19,
+    ["111541971869644"] = 0.19,
+    ["78664576630719"]  = 0.19,
+    ["107130024785302"] = 0.19,
+    ["82698744209552"]  = 0.05,
+    ["101728317807480"] = 0.05,
+    ["93855934180192"]  = 0.05,
+    ["101728317807480"] = 0.05,
+    ["116040007879284"] = 0.05,
+    ["100431815458286"] = 0.05,
+    ["125649118408184"] = 0.19,
+    ["121973872650988"] = 0.19,
+    ["76091091401946"]  = 0.19,
+    ["133017177370738"] = 0.19
+    ["114092765972752"] = 0.19,
 }
--- Load saved timings or use defaults
-local animTimings = {}
-local function loadTimings()
-	pcall(function()
-		if isfile(SAVE_FILE) then
-			local data = game:GetService("HttpService"):JSONDecode(readfile(SAVE_FILE))
-			for id, t in pairs(data) do
-				animTimings[id] = t
-			end
-			print("Loaded saved timings!")
-		end
-	end)
-	-- Fill in any missing with defaults
-	for id, t in pairs(defaultTimings) do
-		if not animTimings[id] then
-			animTimings[id] = t
-		end
-	end
-end
-
-local function saveTimings()
-	pcall(function()
-		writefile(SAVE_FILE, game:GetService("HttpService"):JSONEncode(animTimings))
-	end)
-end
-
-loadTimings()
-
 local lastTriggeredAnim = nil
 local lastTriggeredTime = nil
 local lastPressTime = nil
 local weaveSucceeded = false
-local lastAnimTrack = nil -- track the actual playing track so we can check TimePosition
 local connections = {}
 local walkspeedConnections = {}
 
@@ -302,36 +296,13 @@ local function pressR()
 	lastPress = now
 	weaveSucceeded = false
 	lastPressTime = now
-
-	-- Snapshot the track's TimePosition at press time to determine if we were early or late
-	local trackAtPress = lastAnimTrack
-	local timePosAtPress = (trackAtPress and trackAtPress.IsPlaying) and trackAtPress.TimePosition or nil
-	local animAtPress = lastTriggeredAnim
-
 	VIM:SendKeyEvent(true, Enum.KeyCode.R, false, game)
 	task.wait(0.05)
 	VIM:SendKeyEvent(false, Enum.KeyCode.R, false, game)
-
-	task.delay(0.5, function()
-		if not animAtPress or not animTimings[animAtPress] then return end
-		if not weaveSucceeded then
-			-- Missed — figure out if we were too early or too late
-			if timePosAtPress and animTimings[animAtPress] then
-				local diff = timePosAtPress - animTimings[animAtPress]
-				if diff < -0.03 then
-					-- We pressed way before the timing — nudge later
-					animTimings[animAtPress] = math.min(0.6, animTimings[animAtPress] + 0.01)
-					print("Too early, nudged " .. animAtPress .. " later to " .. string.format("%.3f", animTimings[animAtPress]))
-				else
-					-- We pressed at or after timing but still missed — nudge earlier
-					animTimings[animAtPress] = math.max(0.05, animTimings[animAtPress] - 0.01)
-					print("Too late, nudged " .. animAtPress .. " earlier to " .. string.format("%.3f", animTimings[animAtPress]))
-				end
-			else
-				-- No track info, nudge earlier as fallback
-				animTimings[animAtPress] = math.max(0.05, animTimings[animAtPress] - 0.01)
-			end
-			saveTimings()
+	task.delay(1, function()
+		if not weaveSucceeded and lastTriggeredAnim and animTimings[lastTriggeredAnim] then
+			animTimings[lastTriggeredAnim] = math.max(0.05, animTimings[lastTriggeredAnim] - 0.01)
+			print("Missed weave, nudged " .. lastTriggeredAnim .. " to " .. animTimings[lastTriggeredAnim])
 		end
 	end)
 end
@@ -340,19 +311,13 @@ local function watchMyAnimator()
 	local char = player.Character or player.CharacterAdded:Wait()
 	local humanoid = char:WaitForChild("Humanoid")
 	local animator = humanoid:WaitForChild("Animator")
+
 	animator.AnimationPlayed:Connect(function(track)
 		local id = track.Animation.AnimationId:match("%d+")
 		if successAnims[id] then
 			weaveSucceeded = true
-			if lastTriggeredAnim and animTimings[lastTriggeredAnim] then
-				-- Succeeded — nudge slightly later to find sweet spot
-				animTimings[lastTriggeredAnim] = math.min(0.6, animTimings[lastTriggeredAnim] + 0.005)
-				print("Weave succeeded! nudged " .. lastTriggeredAnim .. " later to " .. string.format("%.3f", animTimings[lastTriggeredAnim]))
-				saveTimings()
-			end
 			lastTriggeredAnim = nil
 			lastTriggeredTime = nil
-			lastAnimTrack = nil
 		end
 	end)
 end
@@ -362,6 +327,7 @@ local function watchWalkspeed(p)
 	if not char then return end
 	local humanoid = char:FindFirstChildOfClass("Humanoid")
 	if not humanoid then return end
+
 	local c = humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
 		if not running then return end
 		local ws = humanoid.WalkSpeed
@@ -378,6 +344,7 @@ local function watchPlayer(p)
 		local humanoid = char:FindFirstChildOfClass("Humanoid")
 		local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
 		if not animator then return end
+
 		local c = animator.AnimationPlayed:Connect(function(track)
 			if not running then return end
 			if getDistance(char) > RADIUS then return end
@@ -387,29 +354,29 @@ local function watchPlayer(p)
 			if delay then
 				lastTriggeredAnim = id
 				lastTriggeredTime = tick()
-				lastAnimTrack = track
 				task.delay(delay, function()
 					if running and getDistance(char) <= RADIUS then pressR() end
 				end)
 			end
 		end)
 		table.insert(connections, c)
+
 		for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
 			local id = track.Animation.AnimationId:match("%d+")
-			if not ignoreAnims[id] then
-				local delay = animTimings[id]
-				if delay and getDistance(char) <= RADIUS then
-					lastTriggeredAnim = id
-					lastTriggeredTime = tick()
-					lastAnimTrack = track
-					task.delay(delay, function()
-						if running and getDistance(char) <= RADIUS then pressR() end
-					end)
-				end
+			if ignoreAnims[id] then continue end
+			local delay = animTimings[id]
+			if delay and getDistance(char) <= RADIUS then
+				lastTriggeredAnim = id
+				lastTriggeredTime = tick()
+				task.delay(delay, function()
+					if running and getDistance(char) <= RADIUS then pressR() end
+				end)
 			end
 		end
+
 		watchWalkspeed(p)
 	end
+
 	if p.Character then connectAnimator(p.Character) end
 	local c = p.CharacterAdded:Connect(function(char)
 		if running then connectAnimator(char) end
