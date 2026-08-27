@@ -4,7 +4,7 @@ local VIM = game:GetService("VirtualInputManager")
 local player = Players.LocalPlayer
 
 local running = false
-local RADIUS = 4
+local RADIUS = 3
 local lastPress = 0
 local DEBOUNCE_TIME = 0.15
 
