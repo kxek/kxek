@@ -339,6 +339,7 @@ local animTimings = {
     ["79108771970889"]  = 0.24,
     ["108613283473440"] = 0.08,
     ["77858421071121"]  = 0.18,
+    ["106372972116826"] = 0.12,
 }
 local lastTriggeredAnim = nil
 local lastTriggeredTime = nil
